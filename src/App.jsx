@@ -1,8 +1,8 @@
-import VectorStudio from './VectorStudio.jsx'
+import Dashboard from './Dashboard.jsx'
 
 function App() {
   return (
-    <VectorStudio />
+    <Dashboard />
   )
 }
 
