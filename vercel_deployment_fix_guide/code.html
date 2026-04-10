@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VectorNiche Obsidian - Deployment Troubleshooting</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .obsidian-bg { background-color: #0a0a0a; }
+        .obsidian-card { background-color: #141414; border: 1px solid #262626; }
+        .accent-glow { box-shadow: 0 0 20px rgba(59, 130, 246, 0.15); }
+    </style>
+</head>
+<body class="obsidian-bg text-slate-300 min-h-screen selection:bg-blue-500/30">
+<div class="max-w-4xl mx-auto px-6 py-12">
+<!-- Status Header -->
+<header class="mb-12">
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
+<span class="material-symbols-outlined text-white">build</span>
+</div>
+<div>
+<h1 class="text-3xl font-extrabold text-white tracking-tight">Troubleshooting Mode</h1>
+<p class="text-slate-500 font-medium">Vercel Deployment Resolution • VectorNiche Max</p>
+</div>
+</div>
+<div class="obsidian-card rounded-2xl p-6 border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-500/5 to-transparent">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-amber-500 mt-1">report</span>
+<div>
+<h2 class="text-lg font-bold text-white mb-1">Deployment Error Detected</h2>
+<p class="text-slate-400 leading-relaxed">
+                            Your deployment at <code class="text-blue-400 bg-blue-950/30 px-1.5 py-0.5 rounded">murex.vercel.app</code> is returning a <span class="text-white font-bold">404: NOT_FOUND</span>. 
+                            This means the Vercel server is active, but it cannot find your <code class="text-slate-200">index.html</code> entry point in the expected output directory.
+                        </p>
+</div>
+</div>
+</div>
+</header>
+<!-- Analysis Section -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+<div class="obsidian-card rounded-3xl p-8">
+<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">visibility</span> Evidence Analysis
+                </h3>
+<div class="relative rounded-xl overflow-hidden border border-slate-800 mb-4 bg-black aspect-video flex items-center justify-center">
+<img alt="Vercel 404 Error" class="opacity-60 grayscale hover:grayscale-0 transition-all duration-500" src="https://lh3.googleusercontent.com/aida/ADBb0uhXnBkzb3So7a2M8QIuNStHDY96m292mOYoJOdEL8LzBUfWECOgsKVlLzG68yRqblwOwwpYdIKjKbAojZ1XWTHIiIh3fTQo3Y7k2UcAeD-BCIDzzLTta7h7P3uPSOb2XLNxILGwPMbJwlBwlkO_Wwh7xxxJI8IsPxCM5-qj9Spk6kxEG8iCtor5IXb-8Zmt5c45ejqEpcRSBZ9OwBnWeps1UTDYlPtNVzCYCcQ929UNsfdxzBuQU885T0LN1VjsTrJEoxrflmULYA"/>
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-2 rounded-lg font-bold text-sm backdrop-blur-md">
+                            404: NOT_FOUND
+                        </div>
+</div>
+</div>
+<p class="text-sm text-slate-400">
+                    The screenshot confirms Vercel's Edge Network is working, but your build process likely placed files in a folder other than what Vercel is looking for.
+                </p>
+</div>
+<div class="obsidian-card rounded-3xl p-8">
+<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">terminal</span> Local Structure
+                </h3>
+<div class="bg-black/50 rounded-xl p-4 font-mono text-xs text-blue-400 border border-slate-800">
+<div class="flex items-center gap-2 mb-2 text-slate-500">
+<span class="material-symbols-outlined text-xs">folder_open</span> project-root/
+                    </div>
+<div class="pl-4 space-y-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">html</span> index.html <span class="text-green-500/70 text-[10px] ml-1">✓ Correct</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">javascript</span> vite.config.js
+                        </div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">description</span> package.json
+                        </div>
+<div class="flex items-center gap-2 opacity-50">
+<span class="material-symbols-outlined text-[14px]">folder</span> src/
+                        </div>
+<div class="flex items-center gap-2 text-amber-500 font-bold">
+<span class="material-symbols-outlined text-[14px]">folder</span> dist/ <span class="text-[10px] ml-1">← Vercel Target</span>
+</div>
+</div>
+</div>
+<p class="text-sm text-slate-400 mt-4">
+                    Based on your <code class="text-slate-200">package.json</code>, Vite is your build engine. Ensure the structure matches the standard Vite template.
+                </p>
+</div>
+</section>
+<!-- Actionable Checklist -->
+<section class="space-y-4">
+<h3 class="text-xl font-bold text-white mb-6">Resolution Checklist</h3>
+<!-- Step 1 -->
+<div class="obsidian-card rounded-2xl p-6 group hover:border-blue-500/50 transition-colors">
+<div class="flex gap-5">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-blue-400 group-hover:bg-blue-900/30 group-hover:text-blue-300">
+<span class="material-symbols-outlined">folder_managed</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-bold text-white mb-1">Verify Entry Point Location</h4>
+<p class="text-sm text-slate-400 mb-3">Ensure <code class="text-slate-200">index.html</code> is at the root directory level, not inside <code class="text-slate-200">src/</code> or <code class="text-slate-200">public/</code>.</p>
+<div class="text-[11px] font-semibold px-3 py-1.5 bg-green-500/10 text-green-500 border border-green-500/20 rounded-lg inline-flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Verified in {{DATA:TEXT:TEXT_7}}
+                        </div>
+</div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="obsidian-card rounded-2xl p-6 group hover:border-blue-500/50 transition-colors">
+<div class="flex gap-5">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-blue-400 group-hover:bg-blue-900/30 group-hover:text-blue-300">
+<span class="material-symbols-outlined">settings_suggest</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-bold text-white mb-1">Configure Vercel Dashboard Settings</h4>
+<p class="text-sm text-slate-400 mb-4">Go to <span class="text-slate-200">Settings → General</span> in your Vercel Project dashboard:</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+<div class="bg-black/30 p-3 rounded-xl border border-slate-800/50">
+<div class="text-[10px] text-slate-500 font-bold uppercase mb-1">Framework Preset</div>
+<div class="text-sm font-mono text-blue-400">Vite</div>
+</div>
+<div class="bg-black/30 p-3 rounded-xl border border-slate-800/50">
+<div class="text-[10px] text-slate-500 font-bold uppercase mb-1">Build Command</div>
+<div class="text-sm font-mono text-blue-400">npm run build</div>
+</div>
+<div class="bg-black/30 p-3 rounded-xl border border-slate-800/50">
+<div class="text-[10px] text-slate-500 font-bold uppercase mb-1">Output Directory</div>
+<div class="text-sm font-mono text-blue-400">dist</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="obsidian-card rounded-2xl p-6 group hover:border-blue-500/50 transition-colors">
+<div class="flex gap-5">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-blue-400 group-hover:bg-blue-900/30 group-hover:text-blue-300">
+<span class="material-symbols-outlined">play_circle</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-bold text-white mb-1">Run Local Build Test</h4>
+<p class="text-sm text-slate-400 mb-3">Execute the build locally to ensure the <code class="text-slate-200">dist/</code> folder is generated without errors.</p>
+<div class="bg-slate-900 p-3 rounded-xl font-mono text-sm text-slate-300 flex justify-between items-center border border-slate-800">
+<span>npm run build</span>
+<span class="material-symbols-outlined text-slate-600 text-[18px]">content_copy</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="obsidian-card rounded-2xl p-6 group hover:border-blue-500/50 transition-colors">
+<div class="flex gap-5">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-blue-400 group-hover:bg-blue-900/30 group-hover:text-blue-300">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-bold text-white mb-1">Check Public Directory Conflict</h4>
+<p class="text-sm text-slate-400">Verify there isn't an <code class="text-slate-200">index.html</code> inside a <code class="text-slate-200">public/</code> folder that might confuse the Vite build process when it tries to use the root-level file.</p>
+</div>
+</div>
+</div>
+</section>
+<footer class="mt-16 pt-8 border-t border-slate-800 text-center">
+<button class="px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-blue-500 hover:text-white transition-all transform hover:scale-105 shadow-xl shadow-blue-500/10" onclick="window.history.back()">
+                Back to Vector Studio
+            </button>
+<p class="text-slate-500 text-xs mt-6">Obsidian Vector Studio • System Diagnostics v1.0.4</p>
+</footer>
+</div>
+</body></html>

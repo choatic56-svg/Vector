@@ -1,0 +1,43 @@
+# Deploying VectorNiche Max to Vercel
+
+Since your project is built with Vite and React, mendeploy ke Vercel sangatlah mudah. Berikut adalah langkah-langkahnya:
+
+## Prasyarat
+1. Akun [GitHub](https://github.com) (sudah ada).
+2. Akun [Vercel](https://vercel.com) (hubungkan dengan GitHub Anda).
+
+## Langkah 1: Push ke GitHub
+Jika Anda belum melakukannya, buat repository baru di GitHub dan push folder `vector-studio` Anda:
+
+```bash
+git init
+git add .
+git commit -m "Initial commit: VectorNiche Max Studio"
+git branch -M main
+git remote add origin https://github.com/USERNAME/vector-studio.git
+git push -u origin main
+```
+
+## Langkah 2: Import ke Vercel
+1. Masuk ke dashboard [Vercel](https://vercel.com/dashboard).
+2. Klik tombol **"Add New..."** lalu pilih **"Project"**.
+3. Cari repository `vector-studio` Anda di daftar repository GitHub dan klik **"Import"**.
+
+## Langkah 3: Konfigurasi Proyek
+Vercel akan secara otomatis mendeteksi bahwa ini adalah proyek **Vite**.
+- **Framework Preset:** Vite (Otomatis terdeteksi).
+- **Build Command:** `npm run build` (Otomatis).
+- **Output Directory:** `dist` (Otomatis).
+
+## Langkah 4: Tambahkan Environment Variables (PENTING)
+Karena kode Anda menggunakan `apiKey`, pastikan Anda tidak mengekspos kunci API langsung di kode jika ingin aman. Namun, berdasarkan kode yang Anda berikan:
+1. Jika `apiKey` dikosongkan di kode (`const apiKey = "";`), Anda mungkin perlu menambahkannya sebagai Environment Variable di Vercel jika sistem Anda mendukung pembacaan `process.env`.
+2. Untuk kemudahan saat ini, jika Anda sudah menempelkan key-nya langsung di `VectorStudio.jsx`, Vercel akan langsung menjalankannya (namun ini tidak disarankan untuk keamanan jangka panjang).
+
+## Langkah 5: Deploy!
+Klik tombol **"Deploy"**. Vercel akan memproses build Anda dalam waktu kurang dari satu menit.
+
+---
+
+## Tips Tambahan: Custom Domain
+Setelah deploy selesai, Vercel akan memberikan URL gratis seperti `vector-studio.vercel.app`. Anda bisa menambahkan domain kustom di tab **Settings > Domains** di dashboard Vercel proyek Anda.

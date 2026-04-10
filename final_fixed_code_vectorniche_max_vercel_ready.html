@@ -1,0 +1,324 @@
+# Final & Fixed Project Structure: vector-studio
+
+Gunakan seluruh kode di bawah ini untuk proyek Anda. Struktur ini sudah dioptimalkan agar **Vercel** dapat mendeteksi dan melakukan build dengan benar tanpa error 404.
+
+## 1. `package.json`
+Pastikan script `build` adalah `vite build`.
+
+```json
+{
+  "name": "vector-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.263.1",
+    "jszip": "^3.10.1",
+    "file-saver": "^2.0.5",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^1.14.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.27",
+    "tailwindcss": "^3.3.3",
+    "vite": "^4.4.5"
+  }
+}
+```
+
+## 2. `vite.config.js` (Fixed for Vercel)
+Menambahkan `base` dan `outDir` secara eksplisit untuk memastikan folder `dist` dikenali.
+
+```javascript
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  base: '/',
+  build: {
+    outDir: 'dist',
+  }
+})
+```
+
+## 3. `index.html`
+Letakkan file ini di **root** folder (bukan di dalam `src`).
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VectorNiche Max - Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+```
+
+## 4. `src/main.jsx`
+```javascript
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import VectorStudio from './VectorStudio.jsx'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <VectorStudio />
+  </React.StrictMode>,
+)
+```
+
+## 5. `src/VectorStudio.jsx` (Full App Code)
+```javascript
+import React, { useState, useEffect } from 'react';
+import { 
+  Palette, Search, Image as ImageIcon, Download, Copy, 
+  RefreshCw, Layers, Layout, CheckCircle2, AlertCircle, 
+  Loader2, Eraser, TrendingUp, FileJson, Zap, Sparkles, 
+  Archive, PlusCircle, MinusCircle, MousePointerClick
+} from 'lucide-react';
+
+const apiKey = ""; // Masukkan API Key Anda di sini atau gunakan Environment Variables
+
+const VectorStudio = () => {
+  const [niche, setNiche] = useState('Back to School');
+  const [category, setCategory] = useState('Education');
+  const [vectorStyle, setVectorStyle] = useState('Flat Design');
+  const [bgStyle, setBgStyle] = useState('White Background');
+  const [batchCount, setBatchCount] = useState(1);
+  
+  const [concepts, setConcepts] = useState([]);
+  const [selectedConcepts, setSelectedConcepts] = useState([]);
+  const [generatedImages, setGeneratedImages] = useState([]);
+  const [trendingNiches, setTrendingNiches] = useState([]);
+  
+  const [loading, setLoading] = useState(false);
+  const [generatingImages, setGeneratingImages] = useState(false);
+  const [currentGenStatus, setCurrentGenStatus] = useState("");
+  const [removingBgId, setRemovingBgId] = useState(null);
+  const [searchingTrends, setSearchingTrends] = useState(false);
+  const [downloadingZip, setDownloadingZip] = useState(false);
+  const [error, setError] = useState(null);
+
+  const niches = ['Back to School', 'Business & Tech', 'Health & Wellness', 'Travel & Nature', 'Food & Culinary', 'Sustainability', 'Mental Health', 'Custom Trend...'];
+  const categories = ['Education', 'Technology', 'Healthcare', 'Lifestyle', 'Corporate', 'Abstract', 'Characters'];
+  const styles = ['Flat Design', 'Kawaii Style', 'Isometric', 'Line Art', 'Watercolor Vector', '3D Clay Style', 'Retro Vintage'];
+  const backgrounds = ['White Background', 'Solid Color', 'Soft Gradient'];
+
+  useEffect(() => {
+    const script1 = document.createElement('script');
+    script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    document.body.appendChild(script1);
+    const script2 = document.createElement('script');
+    script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js';
+    document.body.appendChild(script2);
+    return () => {
+      document.body.removeChild(script1);
+      document.body.removeChild(script2);
+    }
+  }, []);
+
+  const fetchWithRetry = async (url, options, retries = 3, backoff = 1000) => {
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } catch (err) {
+      if (retries > 0) {
+        await new Promise(resolve => setTimeout(resolve, backoff));
+        return fetchWithRetry(url, options, retries - 1, backoff * 2);
+      }
+      throw err;
+    }
+  };
+
+  const findTrendingNiches = async () => {
+    setSearchingTrends(true);
+    setError(null);
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const userQuery = "Berikan 5 ide niche microstock terlaris saat ini. Pisahkan dengan koma.";
+    try {
+      let result = await fetchWithRetry(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: userQuery }] }] })
+      });
+      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+      const rawTrends = text.split(/[\n,]/).map(t => t.replace(/^[-\*\d\.\s]+/, '').trim()).filter(t => t.length > 3);
+      setTrendingNiches(rawTrends.slice(0, 5));
+    } catch (err) {
+      setError(`Gagal mengambil tren: ${err.message}`);
+    } finally {
+      setSearchingTrends(false);
+    }
+  };
+
+  const findConcepts = async (customNicheQuery = null) => {
+    setLoading(true);
+    setError(null);
+    const queryNiche = customNicheQuery || niche;
+    try {
+      const result = await fetchWithRetry(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `10 konsep objek vektor niche: ${queryNiche}` }] }],
+            generationConfig: { responseMimeType: "application/json" }
+          })
+        }
+      );
+      const parsed = JSON.parse(result.candidates[0].content.parts[0].text);
+      setConcepts(parsed.map((item, index) => ({ ...item, id: index + 1 })));
+      setSelectedConcepts(parsed.map((_, i) => i + 1));
+    } catch (err) {
+      setError("Gagal memuat konsep.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateImages = async () => {
+    setGeneratingImages(true);
+    setGeneratedImages([]);
+    const filtered = concepts.filter(c => selectedConcepts.includes(c.id));
+    try {
+      for (const concept of filtered) {
+        for (let i = 0; i < batchCount; i++) {
+          setCurrentGenStatus(`Generating: ${concept.title}...`);
+          const res = await fetchWithRetry(
+            `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ instances: { prompt: `Professional ${vectorStyle} of ${concept.title}, ${bgStyle}` } })
+            }
+          );
+          if (res.predictions?.[0]?.bytesBase64Encoded) {
+            setGeneratedImages(prev => [...prev, {
+              id: crypto.randomUUID(),
+              title: concept.title,
+              url: `data:image/png;base64,${res.predictions[0].bytesBase64Encoded}`,
+              hasBg: true
+            }]);
+          }
+        }
+      }
+    } catch (err) {
+      setError("Error generating images.");
+    } finally {
+      setGeneratingImages(false);
+      setCurrentGenStatus("");
+    }
+  };
+
+  const downloadAllAsZip = async () => {
+    const zip = new window.JSZip();
+    const folder = zip.folder("VectorStudio_Assets");
+    generatedImages.forEach((img, index) => {
+      folder.file(`asset_${index}.png`, img.url.split(',')[1], {base64: true});
+    });
+    const content = await zip.generateAsync({type: "blob"});
+    window.saveAs(content, "VectorStudio_Assets.zip");
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-6 font-sans">
+      <nav className="max-w-7xl mx-auto flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-black text-slate-900">VECTOR<span className="text-blue-600">NICHE</span></h1>
+        <button onClick={findTrendingNiches} className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-sm font-bold flex items-center gap-2">
+          {searchingTrends ? <Loader2 className="animate-spin" size={16}/> : <TrendingUp size={16} className="text-amber-500"/>}
+          Cek Tren
+        </button>
+      </nav>
+
+      <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+             <label className="text-xs font-bold text-slate-400 uppercase">Niche</label>
+             <select value={niche} onChange={e => setNiche(e.target.value)} className="w-full p-3 mt-1 bg-slate-50 border border-slate-100 rounded-xl">
+               {niches.map(n => <option key={n}>{n}</option>)}
+             </select>
+             <button onClick={() => findConcepts()} className="w-full mt-4 bg-slate-900 text-white font-bold py-3 rounded-xl">CARI KONSEP</button>
+          </div>
+
+          {concepts.length > 0 && (
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+              <h3 className="font-bold text-sm mb-4">Pilih Konsep</h3>
+              <div className="space-y-2 max-h-40 overflow-y-auto mb-4">
+                {concepts.map(c => (
+                  <label key={c.id} className="flex items-center gap-3 p-2 border rounded-lg">
+                    <input type="checkbox" checked={selectedConcepts.includes(c.id)} onChange={() => {}}/>
+                    <span className="text-sm">{c.title}</span>
+                  </label>
+                ))}
+              </div>
+              <button onClick={generateImages} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">GENERATE</button>
+            </div>
+          )}
+        </div>
+
+        <div className="lg:col-span-8">
+           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+             {generatedImages.map(img => (
+               <div key={img.id} className="bg-white p-2 rounded-2xl border">
+                 <img src={img.url} alt="" className="w-full aspect-square object-contain"/>
+                 <p className="text-[10px] font-bold mt-2 truncate">{img.title}</p>
+               </div>
+             ))}
+           </div>
+           {generatedImages.length > 0 && (
+             <button onClick={downloadAllAsZip} className="mt-8 bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold w-full">DOWNLOAD ZIP</button>
+           )}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default VectorStudio;
+```
+
+## 6. `.gitignore`
+```text
+node_modules
+dist
+.DS_Store
+*.local
+```
+
+## 7. `README.md`
+```markdown
+# VectorNiche Max Studio
+
+Proyek generator aset vektor berbasis AI untuk kontributor microstock.
+
+## Cara Install
+1. `npm install`
+2. Masukkan API Key di `src/VectorStudio.jsx`
+3. `npm run dev`
+
+## Deployment
+Push ke GitHub dan hubungkan ke Vercel. Vercel akan otomatis mendeteksi konfigurasi Vite.
+```

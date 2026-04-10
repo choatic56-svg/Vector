@@ -1,0 +1,87 @@
+# Fixed Project Structure for Vercel: vector-studio
+
+If you are seeing a **404: NOT_FOUND** error on Vercel, it's likely because the build process is not outputting files where Vercel expects them, or the entry point is missing. Use this updated configuration.
+
+## 1. `package.json` (Updated)
+Ensure your build script is exactly `vite build`.
+
+```json
+{
+  "name": "vector-studio",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.263.1",
+    "jszip": "^3.10.1",
+    "file-saver": "^2.0.5",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^1.14.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.27",
+    "tailwindcss": "^3.3.3",
+    "vite": "^4.4.5"
+  }
+}
+```
+
+## 2. `vite.config.js` (Explicit Output)
+We are adding an explicit `base` and `build` configuration to ensure it targets the `dist` folder.
+
+```javascript
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  base: '/',
+  build: {
+    outDir: 'dist',
+  }
+})
+```
+
+## 3. `index.html` (Must be in the Root)
+Vite expects `index.html` to be in the root directory, not inside `src/` or `public/`.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VectorNiche Max - Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+```
+
+## 4. Vercel Dashboard Settings
+After pushing these changes to GitHub, check these in the Vercel UI:
+1. **Framework Preset:** `Vite`
+2. **Root Directory:** `./` (Leave empty)
+3. **Build Command:** `npm run build`
+4. **Output Directory:** `dist`
+
+## 5. Deployment Step
+1. **Push to GitHub:** `git add . && git commit -m "Fix: vercel deployment config" && git push`
+2. **Check Vercel:** Vercel should automatically start a new deployment. If not, go to the **Deployments** tab and click **Redeploy**.
